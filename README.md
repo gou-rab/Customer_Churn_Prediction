@@ -1,4 +1,5 @@
 📊 Customer Churn Prediction AI 🚀
+
 This project leverages Machine Learning to predict customer churn for subscription-based businesses. By analyzing historical data, the AI identifies patterns that lead to customer departure, allowing businesses to take proactive retention measures. 🏦✨
 
 🌟 Key Features
@@ -16,12 +17,9 @@ Bash
 git clone [https://github.com/gou-rab/Customer_Churn_Prediction.git](https://github.com/gou-rab/Customer_Churn_Prediction.git)
 
 📦 Install requirements:
-
-Bash
 pip install -r requirements.txt
 
 🏃 Run the script:
-Bash
 python customer_churn_prediction.py
 
 🏆 Performance Highlights
