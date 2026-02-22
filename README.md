@@ -16,15 +16,19 @@ This project leverages Machine Learning to predict customer churn for subscripti
 
 📥 Clone the repo:
 
-Bash
+bash
 
 git clone [https://github.com/gou-rab/Customer_Churn_Prediction.git](https://github.com/gou-rab/Customer_Churn_Prediction.git)
 
 📦 Install requirements:
 
+bash
+
 pip install -r requirements.txt
 
 🏃 Run the script:
+
+bash
 
 python customer_churn_prediction.py
 
