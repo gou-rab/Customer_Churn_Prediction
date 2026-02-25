@@ -558,7 +558,7 @@ body {
 const API = 'http://127.0.0.1:5000';
 let state = { cc:1, am:1 };
 
-// ── Constellation BG ─────────────────────────────────────────────────────────
+//  Constellation BG 
 const bgC = document.getElementById('bg-canvas'), bgX = bgC.getContext('2d');
 let nodes = [];
 function resizeBg(){bgC.width=innerWidth;bgC.height=innerHeight;}
@@ -579,7 +579,7 @@ function drawBg(){
 resizeBg();initNodes();drawBg();
 window.addEventListener('resize',()=>{resizeBg();initNodes();});
 
-// ── Main Ring Gauge ───────────────────────────────────────────────────────────
+// Main Ring Gauge 
 let mainRingInst = null;
 function drawMainRing(pct, color) {
   if(mainRingInst) mainRingInst.destroy();
@@ -604,7 +604,7 @@ function drawMainRing(pct, color) {
 }
 drawMainRing(20.4, 'rgba(0,220,255,0.7)');
 
-// ── Sparklines ────────────────────────────────────────────────────────────────
+// Sparklines
 function drawSpark(id, data, color) {
   const canvas = document.getElementById(id);
   if(!canvas) return;
@@ -632,7 +632,7 @@ setTimeout(() => {
   drawSpark('spark4', [14,12,13,11,12,10,12,12], '#00ff88');
 }, 100);
 
-// ── Monthly Trend Chart ───────────────────────────────────────────────────────
+// Monthly Trend Chart
 new Chart(document.getElementById('trendChart'), {
   type: 'line',
   data: {
@@ -654,7 +654,7 @@ new Chart(document.getElementById('trendChart'), {
   }
 });
 
-// ── Live feed animation ───────────────────────────────────────────────────────
+// Live feed animation 
 const FEEDS = [
   { s:'neg', src:'Twitter · @angry_user',    time:'just now', txt:'"Your app just lost all my transaction history!"' },
   { s:'pos', src:'App Store · 5★',           time:'1m ago',   txt:'"Best banking app I\'ve used. Incredibly intuitive."' },
@@ -684,7 +684,7 @@ setInterval(() => {
   if(container.children.length > 5) container.removeChild(container.lastChild);
 }, 5000);
 
-// ── Toggle ────────────────────────────────────────────────────────────────────
+// Toggle 
 function tog(key, val) {
   state[key] = val;
   if(key==='cc') {
@@ -696,7 +696,7 @@ function tog(key, val) {
   }
 }
 
-// ── Server check ──────────────────────────────────────────────────────────────
+// Server check 
 async function checkServer() {
   try {
     const r = await fetch(`${API}/model-info`, {signal:AbortSignal.timeout(2200)});
@@ -717,7 +717,7 @@ function showErr(msg) {
   setTimeout(()=>el.style.display='none',5000);
 }
 
-// ── PREDICT ───────────────────────────────────────────────────────────────────
+// PREDICT 
 async function predict() {
   const credit_score    = parseInt(document.getElementById('f-credit').value);
   const age             = parseInt(document.getElementById('f-age').value);
