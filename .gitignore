@@ -1,0 +1,16 @@
+# Generated model files
+*.pkl
+*.png
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Virtual environment
+venv/
+env/
+.env
+
+# VS Code
+.vscode/
