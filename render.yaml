@@ -1,0 +1,6 @@
+services:
+  - type: web
+    name: churnguard-predictor
+    env: python
+    buildCommand: pip install -r requirements.txt && python churn_predictor.py
+    startCommand: python app.py
