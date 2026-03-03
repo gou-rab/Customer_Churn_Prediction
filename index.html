@@ -2,295 +2,227 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>ChurnGuard — Customer Churn Detection</title>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 <style>
 :root {
-  --bg:      #040c18;
-  --panel:   rgba(5,15,32,0.9);
-  --border:  rgba(0,220,255,0.15);
-  --cyan:    #00dcff;
-  --cyan2:   #00aadd;
-  --red:     #ff2244;
-  --red2:    #cc1133;
-  --green:   #00ff88;
-  --amber:   #ffaa00;
-  --yellow:  #ffe033;
-  --text:    #c0d8f0;
-  --muted:   #2a4a6a;
-  --glow:    0 0 28px rgba(0,220,255,0.18);
+  --bg:#040c18; --panel:rgba(5,15,32,0.9); --border:rgba(0,220,255,0.15);
+  --cyan:#00dcff; --red:#ff2244; --green:#00ff88; --amber:#ffaa00;
+  --text:#c0d8f0; --muted:#2a4a6a; --glow:0 0 28px rgba(0,220,255,0.18);
 }
-* { box-sizing:border-box; margin:0; padding:0; }
-body {
-  background:var(--bg); font-family:'Rajdhani',sans-serif;
-  color:var(--text); min-height:100vh; overflow-x:hidden;
-}
-#bg-canvas { position:fixed; inset:0; z-index:0; pointer-events:none; }
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{width:100%;overflow-x:hidden;}
+body{background:var(--bg);font-family:'Rajdhani',sans-serif;color:var(--text);min-height:100vh;}
+#bg-canvas{position:fixed;inset:0;z-index:0;pointer-events:none;}
+.wrap{position:relative;z-index:1;padding:16px;display:flex;flex-direction:column;gap:14px;min-height:100vh;width:100%;}
 
-.wrap { position:relative; z-index:1; padding:16px; display:flex; flex-direction:column; gap:14px; min-height:100vh; }
-
-/* ── HEADER ── */
-.header {
-  display:flex; align-items:center; justify-content:space-between;
-  padding:13px 26px; background:var(--panel);
-  border:1px solid var(--border); border-radius:14px;
-  backdrop-filter:blur(20px); box-shadow:var(--glow);
-}
-.h-brand { display:flex; align-items:center; gap:14px; }
-.h-icon {
-  width:40px; height:40px; border-radius:50%;
-  border:2px solid var(--cyan); display:flex; align-items:center; justify-content:center;
-  font-size:18px; box-shadow:0 0 18px rgba(0,220,255,0.35);
-  animation:pulse-ring 2.5s ease-in-out infinite;
-}
-@keyframes pulse-ring {
-  0%,100%{box-shadow:0 0 18px rgba(0,220,255,0.35);}
-  50%{box-shadow:0 0 32px rgba(0,220,255,0.7);}
-}
-.h-title { font-family:'Orbitron',monospace; font-size:14px; font-weight:700; letter-spacing:3px; color:#e0f0ff; }
-.h-sub   { font-size:11px; color:var(--muted); letter-spacing:1px; margin-top:2px; }
-.h-right { display:flex; align-items:center; gap:12px; }
-.s-pill  {
-  display:flex; align-items:center; gap:8px;
-  background:rgba(0,220,255,0.06); border:1px solid var(--border);
-  border-radius:99px; padding:7px 16px; font-size:11px; color:var(--muted);
-}
-.sdot { width:7px;height:7px;border-radius:50%;background:#222;transition:all .4s; }
-.sdot.on  { background:var(--green); box-shadow:0 0 10px var(--green); animation:blink 2s infinite; }
-.sdot.off { background:var(--red);   box-shadow:0 0 10px var(--red); }
+/* HEADER */
+.header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;padding:13px 26px;background:var(--panel);border:1px solid var(--border);border-radius:14px;backdrop-filter:blur(20px);box-shadow:var(--glow);}
+.h-brand{display:flex;align-items:center;gap:14px;}
+.h-icon{width:40px;height:40px;border-radius:50%;flex-shrink:0;border:2px solid var(--cyan);display:flex;align-items:center;justify-content:center;font-size:18px;box-shadow:0 0 18px rgba(0,220,255,0.35);animation:pulse-ring 2.5s ease-in-out infinite;}
+@keyframes pulse-ring{0%,100%{box-shadow:0 0 18px rgba(0,220,255,0.35);}50%{box-shadow:0 0 32px rgba(0,220,255,0.7);}}
+.h-title{font-family:'Orbitron',monospace;font-size:14px;font-weight:700;letter-spacing:3px;color:#e0f0ff;}
+.h-sub{font-size:11px;color:var(--muted);letter-spacing:1px;margin-top:2px;}
+.h-right{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+.s-pill{display:flex;align-items:center;gap:8px;background:rgba(0,220,255,0.06);border:1px solid var(--border);border-radius:99px;padding:7px 16px;font-size:11px;color:var(--muted);}
+.sdot{width:7px;height:7px;border-radius:50%;background:#222;transition:all .4s;}
+.sdot.on{background:var(--green);box-shadow:0 0 10px var(--green);animation:blink 2s infinite;}
+.sdot.off{background:var(--red);box-shadow:0 0 10px var(--red);}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.5}}
-.acc-chip { font-family:'Orbitron',monospace; font-size:11px; color:var(--cyan); background:rgba(0,220,255,0.07); border:1px solid var(--border); border-radius:8px; padding:5px 14px; }
+.acc-chip{font-family:'Orbitron',monospace;font-size:11px;color:var(--cyan);background:rgba(0,220,255,0.07);border:1px solid var(--border);border-radius:8px;padding:5px 14px;white-space:nowrap;}
 
-/* ── MAIN LAYOUT ── */
-.main-layout {
-  display:grid;
-  grid-template-columns:280px 1fr 280px;
-  grid-template-rows:auto auto;
-  min-width:0;
-  gap:14px;
-  flex:1;
+/* MAIN GRID - Desktop */
+.main-layout{display:grid;grid-template-columns:280px 1fr 280px;grid-template-rows:auto auto;gap:14px;flex:1;width:100%;}
 
-}
+/* PANEL */
+.panel{background:var(--panel);border:1px solid var(--border);border-radius:14px;backdrop-filter:blur(20px);padding:18px;position:relative;overflow:hidden;box-shadow:0 4px 30px rgba(0,0,0,0.6);min-width:0;}
+.panel::before{content:'';position:absolute;top:0;left:18px;right:18px;height:1px;background:linear-gradient(90deg,transparent,var(--cyan),transparent);opacity:.3;}
+.ptitle{font-family:'Orbitron',monospace;font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+.ptitle::after{content:'';flex:1;height:1px;background:var(--border);}
 
-/* ── PANEL base ── */
-.panel {
-  background:var(--panel); border:1px solid var(--border); border-radius:14px;
-  backdrop-filter:blur(20px); padding:18px; position:relative; overflow:hidden;
-  box-shadow:0 4px 30px rgba(0,0,0,0.6);
-}
-.panel::before {
-  content:''; position:absolute; top:0; left:18px; right:18px; height:1px;
-  background:linear-gradient(90deg,transparent,var(--cyan),transparent); opacity:.3;
-}
-.ptitle {
-  font-family:'Orbitron',monospace; font-size:9px; letter-spacing:3px;
-  text-transform:uppercase; color:var(--muted); margin-bottom:14px;
-  display:flex; align-items:center; gap:8px;
-}
-.ptitle::after { content:''; flex:1; height:1px; background:var(--border); }
+/* CENTER PANEL */
+.center-panel{grid-column:2;grid-row:1/3;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:16px;padding:24px;}
+.gauge-section{display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;}
 
-/* ── CENTER: Big churn gauge ── */
-.center-panel {
-  grid-column:2; grid-row:1/3;
-  display:flex; flex-direction:column; align-items:center;
-  justify-content:flex-start; gap:16px; padding:24px;
-}
+/* RING */
+.ring-container{position:relative;width:260px;height:260px;margin:0 auto;flex-shrink:0;}
+#mainRing{position:absolute;inset:0;width:100%!important;height:100%!important;}
+.ring-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.ring-label{font-size:11px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:4px;text-align:center;}
+.ring-pct{font-family:'Orbitron',monospace;font-size:52px;font-weight:900;color:#fff;line-height:1;text-shadow:0 0 30px rgba(0,220,255,0.6);transition:color .5s;}
+.ring-sub{font-size:11px;letter-spacing:1px;color:var(--muted);margin-top:4px;text-align:center;}
+.ring-container::before{content:'';position:absolute;inset:-10px;border-radius:50%;border:1px solid rgba(0,220,255,0.08);animation:orbit 8s linear infinite;}
+.ring-container::after{content:'';position:absolute;inset:-20px;border-radius:50%;border:1px solid rgba(0,220,255,0.04);animation:orbit 14s linear infinite reverse;}
+@keyframes orbit{to{transform:rotate(360deg);}}
 
-.gauge-section {
-  display:flex; flex-direction:column; align-items:center; gap:0;  justify-content:center; width:100%;
-}
-
-.gauge-title {
-  font-family:'Orbitron',monospace; font-size:11px; letter-spacing:3px;
-  text-transform:uppercase; color:var(--muted); margin-bottom:14px;
-}
-
-/* Ring gauge */
-.ring-container { position:relative; width:260px; height:260px; margin:0 auto;}
-#mainRing { position:absolute; inset:0; }
-.ring-center {
-  position:absolute; inset:0; display:flex; flex-direction:column;
-  align-items:center; justify-content:center;
-}
-.ring-label { font-size:11px; letter-spacing:2px; color:var(--muted); text-transform:uppercase; margin-bottom:4px; }
-.ring-pct {
-  font-family:'Orbitron',monospace; font-size:52px; font-weight:900;
-  color:#fff; line-height:1;
-  text-shadow:0 0 30px rgba(0,220,255,0.6);
-  transition:color .5s;
-}
-.ring-sub { font-size:11px; letter-spacing:1px; color:var(--muted); margin-top:4px; }
-
-/* Orbital glow rings */
-.ring-container::before {
-  content:''; position:absolute; inset:-10px; border-radius:50%;
-  border:1px solid rgba(0,220,255,0.08);
-  animation:orbit 8s linear infinite;
-}
-.ring-container::after {
-  content:''; position:absolute; inset:-20px; border-radius:50%;
-  border:1px solid rgba(0,220,255,0.04);
-  animation:orbit 14s linear infinite reverse;
-}
-@keyframes orbit { to { transform:rotate(360deg); } }
-
-/* Customer input form */
-.input-form { width:100%; }
-.form-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px; }
-.field label { font-size:10px; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted); margin-bottom:4px; display:block; }
-.cyber-input {
-  width:100%; background:rgba(0,220,255,0.04); border:1px solid var(--border);
-  border-radius:8px; color:var(--text); font-family:'Rajdhani',sans-serif;
-  font-size:13px; padding:8px 11px; outline:none; transition:border-color .2s;
-}
-.cyber-input:focus { border-color:var(--cyan); box-shadow:0 0 0 2px rgba(0,220,255,0.09); }
-.cyber-select {
-  width:100%; background:rgba(0,220,255,0.04); border:1px solid var(--border);
-  border-radius:8px; color:var(--text); font-family:'Rajdhani',sans-serif;
-  font-size:13px; padding:8px 30px 8px 11px; outline:none;
-  appearance:none; -webkit-appearance:none; cursor:pointer;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%2300dcff'/%3E%3C/svg%3E");
-  background-repeat:no-repeat; background-position:right 10px center;
-  transition:border-color .2s;
-}
-.cyber-select:focus { border-color:var(--cyan); }
-.cyber-select option { background:#060f1e; }
-
-/* Toggle */
-.toggle-row { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:14px; }
-.toggle-group { display:flex; border:1px solid var(--border); border-radius:8px; overflow:hidden; }
-.toggle-btn { flex:1; padding:8px; background:rgba(0,220,255,0.03); border:none; color:var(--muted); font-family:'Orbitron',monospace; font-size:9px; cursor:pointer; transition:all .2s; letter-spacing:1px; }
-.toggle-btn.active { background:rgba(0,220,255,0.15); color:var(--cyan); }
-
-.predict-btn {
-  width:100%; padding:14px;
-  background:linear-gradient(135deg,rgba(0,220,255,.15),rgba(0,150,200,.07));
-  border:1px solid var(--cyan); border-radius:10px;
-  color:var(--cyan); font-family:'Orbitron',monospace; font-size:10px;
-  font-weight:700; letter-spacing:3px; cursor:pointer;
-  transition:all .25s; box-shadow:0 0 14px rgba(0,220,255,.12);
-  display:flex; align-items:center; justify-content:center; gap:10px;
-}
-.predict-btn:hover { background:rgba(0,220,255,.22); box-shadow:0 0 30px rgba(0,220,255,.4); transform:translateY(-1px); }
-.predict-btn:disabled { opacity:.4; cursor:not-allowed; transform:none; }
-.spinner { width:14px;height:14px;border:2px solid rgba(0,220,255,.2);border-top-color:var(--cyan);border-radius:50%;animation:spin .7s linear infinite;display:none; }
+/* FORM */
+.input-form{width:100%;}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;}
+.field label{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:4px;display:block;}
+.cyber-input{width:100%;background:rgba(0,220,255,0.04);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'Rajdhani',sans-serif;font-size:13px;padding:8px 11px;outline:none;transition:border-color .2s;}
+.cyber-input:focus{border-color:var(--cyan);box-shadow:0 0 0 2px rgba(0,220,255,0.09);}
+.cyber-select{width:100%;background:rgba(0,220,255,0.04);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'Rajdhani',sans-serif;font-size:13px;padding:8px 30px 8px 11px;outline:none;appearance:none;-webkit-appearance:none;cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%2300dcff'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;transition:border-color .2s;}
+.cyber-select:focus{border-color:var(--cyan);}
+.cyber-select option{background:#060f1e;}
+.toggle-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+.toggle-group{display:flex;border:1px solid var(--border);border-radius:8px;overflow:hidden;}
+.toggle-btn{flex:1;padding:8px;background:rgba(0,220,255,0.03);border:none;color:var(--muted);font-family:'Orbitron',monospace;font-size:9px;cursor:pointer;transition:all .2s;letter-spacing:1px;}
+.toggle-btn.active{background:rgba(0,220,255,0.15);color:var(--cyan);}
+.predict-btn{width:100%;padding:14px;background:linear-gradient(135deg,rgba(0,220,255,.15),rgba(0,150,200,.07));border:1px solid var(--cyan);border-radius:10px;color:var(--cyan);font-family:'Orbitron',monospace;font-size:10px;font-weight:700;letter-spacing:3px;cursor:pointer;transition:all .25s;box-shadow:0 0 14px rgba(0,220,255,.12);display:flex;align-items:center;justify-content:center;gap:10px;}
+.predict-btn:hover{background:rgba(0,220,255,.22);box-shadow:0 0 30px rgba(0,220,255,.4);transform:translateY(-1px);}
+.predict-btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.spinner{width:14px;height:14px;border:2px solid rgba(0,220,255,.2);border-top-color:var(--cyan);border-radius:50%;animation:spin .7s linear infinite;display:none;}
 @keyframes spin{to{transform:rotate(360deg)}}
 
-/* ── LEFT TOP: Risk Segmentation ── */
-.risk-seg { grid-column:1; grid-row:1; }
-.seg-cards { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
-.seg-card {
-  background:rgba(0,220,255,0.04); border:1px solid var(--border);
-  border-radius:10px; padding:12px 10px; position:relative; overflow:hidden;
-  transition:border-color .3s;
-}
-.seg-card:hover { border-color:rgba(0,220,255,0.35); }
-.seg-card-title { font-size:10px; color:var(--muted); letter-spacing:.5px; margin-bottom:6px; line-height:1.3; }
-.seg-pct {
-  font-family:'Orbitron',monospace; font-size:18px; font-weight:700;
-  margin-bottom:4px;
-}
-.seg-pct.high   { color:var(--red);   text-shadow:0 0 10px var(--red); }
-.seg-pct.medium { color:var(--amber); text-shadow:0 0 10px var(--amber); }
-.seg-pct.low    { color:var(--green); text-shadow:0 0 10px var(--green); }
-.seg-tag { font-size:9px; letter-spacing:1px; color:var(--muted); text-transform:uppercase; }
-.spark-canvas { width:100%; height:32px; margin-top:6px; }
+/* LEFT PANELS */
+.risk-seg{grid-column:1;grid-row:1;}
+.seg-cards{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.seg-card{background:rgba(0,220,255,0.04);border:1px solid var(--border);border-radius:10px;padding:12px 10px;transition:border-color .3s;}
+.seg-card:hover{border-color:rgba(0,220,255,0.35);}
+.seg-card-title{font-size:10px;color:var(--muted);letter-spacing:.5px;margin-bottom:6px;line-height:1.3;}
+.seg-pct{font-family:'Orbitron',monospace;font-size:18px;font-weight:700;margin-bottom:4px;}
+.seg-pct.high{color:var(--red);text-shadow:0 0 10px var(--red);}
+.seg-pct.medium{color:var(--amber);text-shadow:0 0 10px var(--amber);}
+.seg-pct.low{color:var(--green);text-shadow:0 0 10px var(--green);}
+.seg-tag{font-size:9px;letter-spacing:1px;color:var(--muted);text-transform:uppercase;}
+.spark-canvas{width:100%;height:32px;margin-top:6px;}
+.playbook{grid-column:1;grid-row:2;}
+.play-item{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid rgba(0,220,255,0.08);}
+.play-item:last-child{border-bottom:none;padding-bottom:0;}
+.play-icon{font-size:16px;flex-shrink:0;margin-top:1px;}
+.play-text{flex:1;min-width:0;}
+.play-title{font-size:12px;font-weight:600;color:var(--text);letter-spacing:.5px;}
+.play-desc{font-size:10px;color:var(--muted);margin-top:2px;line-height:1.4;}
+.play-badge{font-family:'Orbitron',monospace;font-size:8px;letter-spacing:1px;padding:3px 8px;border-radius:4px;border:1px solid;flex-shrink:0;align-self:center;}
+.play-badge.urgent{color:var(--red);border-color:var(--red);background:rgba(255,34,68,.08);}
+.play-badge.high-p{color:var(--amber);border-color:var(--amber);background:rgba(255,170,0,.08);}
+.play-badge.normal{color:var(--cyan);border-color:var(--cyan);background:rgba(0,220,255,.08);}
 
-/* ── LEFT BOTTOM: Retention Playbook ── */
-.playbook { grid-column:1; grid-row:2; }
-.play-item {
-  display:flex; align-items:flex-start; gap:10px;
-  padding:10px 0; border-bottom:1px solid rgba(0,220,255,0.08);
-}
-.play-item:last-child { border-bottom:none; padding-bottom:0; }
-.play-icon { font-size:16px; flex-shrink:0; margin-top:1px; }
-.play-text { flex:1; }
-.play-title { font-size:12px; font-weight:600; color:var(--text); letter-spacing:.5px; }
-.play-desc  { font-size:10px; color:var(--muted); margin-top:2px; line-height:1.4; }
-.play-badge {
-  font-family:'Orbitron',monospace; font-size:8px; letter-spacing:1px;
-  padding:3px 8px; border-radius:4px; border:1px solid; flex-shrink:0;
-  align-self:center;
-}
-.play-badge.urgent   { color:var(--red);   border-color:var(--red);   background:rgba(255,34,68,.08); }
-.play-badge.high-p   { color:var(--amber); border-color:var(--amber); background:rgba(255,170,0,.08); }
-.play-badge.normal   { color:var(--cyan);  border-color:var(--cyan);  background:rgba(0,220,255,.08); }
+/* RIGHT PANELS */
+.churn-factors{grid-column:3;grid-row:1;}
+.treemap{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+.tree-item{border-radius:8px;padding:10px 12px;cursor:default;transition:filter .2s;position:relative;overflow:hidden;}
+.tree-item::before{content:'';position:absolute;inset:0;background:rgba(255,255,255,0.04);border-radius:8px;}
+.tree-item.big{grid-column:span 2;padding:14px 16px;}
+.tree-item.red-bg{background:linear-gradient(135deg,rgba(200,20,50,0.75),rgba(150,10,30,0.6));border:1px solid rgba(255,50,80,0.4);}
+.tree-item.amber-bg{background:linear-gradient(135deg,rgba(180,110,0,0.65),rgba(120,70,0,0.5));border:1px solid rgba(255,170,0,0.3);}
+.tree-item.blue-bg{background:linear-gradient(135deg,rgba(0,80,180,0.65),rgba(0,50,120,0.5));border:1px solid rgba(0,150,255,0.3);}
+.tree-item.teal-bg{background:linear-gradient(135deg,rgba(0,120,120,0.65),rgba(0,80,80,0.5));border:1px solid rgba(0,200,200,0.3);}
+.tree-item.dark-bg{background:linear-gradient(135deg,rgba(20,40,80,0.65),rgba(10,25,55,0.5));border:1px solid rgba(0,100,180,0.2);}
+.tree-factor{font-size:11px;font-weight:600;color:#fff;letter-spacing:.5px;line-height:1.3;margin-bottom:4px;}
+.tree-pct{font-family:'Orbitron',monospace;font-size:20px;font-weight:900;color:#fff;}
+.tree-pct.big-text{font-size:28px;}
+.tree-item:hover{filter:brightness(1.2);}
+.sentiment{grid-column:3;grid-row:2;}
+.feed-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.live-tag{display:flex;align-items:center;gap:6px;font-family:'Orbitron',monospace;font-size:9px;letter-spacing:2px;color:var(--red);}
+.live-blink{width:6px;height:6px;border-radius:50%;background:var(--red);box-shadow:0 0 8px var(--red);animation:blink 1s infinite;}
+.feed-item{padding:10px 0;border-bottom:1px solid rgba(0,220,255,0.07);}
+.feed-item:last-child{border-bottom:none;}
+.feed-meta{display:flex;align-items:center;gap:8px;margin-bottom:4px;flex-wrap:wrap;}
+.feed-sentiment{font-size:9px;letter-spacing:1px;text-transform:uppercase;padding:2px 8px;border-radius:4px;font-weight:700;}
+.feed-sentiment.neg{color:var(--red);background:rgba(255,34,68,.1);border:1px solid rgba(255,34,68,.2);}
+.feed-sentiment.pos{color:var(--green);background:rgba(0,255,136,.1);border:1px solid rgba(0,255,136,.2);}
+.feed-sentiment.neu{color:var(--amber);background:rgba(255,170,0,.1);border:1px solid rgba(255,170,0,.2);}
+.feed-source{font-size:10px;color:var(--muted);}
+.feed-time{font-size:9px;color:var(--muted);margin-left:auto;}
+.feed-text{font-size:12px;color:var(--text);line-height:1.4;}
 
-/* ── RIGHT TOP: Churn Factors ── */
-.churn-factors { grid-column:3; grid-row:1; }
-.treemap { display:grid; grid-template-columns:1fr 1fr; grid-template-rows:auto auto auto; gap:6px; }
-.tree-item {
-  border-radius:8px; padding:10px 12px; cursor:default;
-  transition:filter .2s; position:relative; overflow:hidden;
-}
-.tree-item::before { content:''; position:absolute; inset:0; background:rgba(255,255,255,0.04); border-radius:8px; }
-.tree-item.big { grid-column:span 2; padding:14px 16px; }
-.tree-item.red-bg    { background:linear-gradient(135deg,rgba(200,20,50,0.75),rgba(150,10,30,0.6)); border:1px solid rgba(255,50,80,0.4); }
-.tree-item.amber-bg  { background:linear-gradient(135deg,rgba(180,110,0,0.65),rgba(120,70,0,0.5));  border:1px solid rgba(255,170,0,0.3); }
-.tree-item.blue-bg   { background:linear-gradient(135deg,rgba(0,80,180,0.65),rgba(0,50,120,0.5));   border:1px solid rgba(0,150,255,0.3); }
-.tree-item.teal-bg   { background:linear-gradient(135deg,rgba(0,120,120,0.65),rgba(0,80,80,0.5));   border:1px solid rgba(0,200,200,0.3); }
-.tree-item.dark-bg   { background:linear-gradient(135deg,rgba(20,40,80,0.65),rgba(10,25,55,0.5));   border:1px solid rgba(0,100,180,0.2); }
-.tree-factor { font-size:11px; font-weight:600; color:#fff; letter-spacing:.5px; line-height:1.3; margin-bottom:4px; }
-.tree-pct { font-family:'Orbitron',monospace; font-size:20px; font-weight:900; color:#fff; }
-.tree-pct.big-text { font-size:28px; }
-.tree-item:hover { filter:brightness(1.2); }
+/* BOTTOM STATS */
+.btm-bar{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;}
+.bchip{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:10px 14px;display:flex;align-items:center;gap:10px;min-width:0;}
+.bicon{font-size:18px;flex-shrink:0;}
+.bval{font-family:'Orbitron',monospace;font-size:13px;color:var(--cyan);font-weight:700;}
+.blbl{font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;}
+.err-toast{position:fixed;bottom:22px;right:22px;background:rgba(255,34,68,.1);border:1px solid var(--red);border-radius:10px;padding:14px 20px;font-size:13px;color:var(--red);display:none;z-index:999;max-width:90vw;}
 
-/* ── RIGHT BOTTOM: Live Sentiment Feed ── */
-.sentiment { grid-column:3; grid-row:2; }
-.feed-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
-.live-tag { display:flex; align-items:center; gap:6px; font-family:'Orbitron',monospace; font-size:9px; letter-spacing:2px; color:var(--red); }
-.live-blink { width:6px;height:6px;border-radius:50%;background:var(--red);box-shadow:0 0 8px var(--red);animation:blink 1s infinite; }
-.feed-item { padding:10px 0; border-bottom:1px solid rgba(0,220,255,0.07); }
-.feed-item:last-child { border-bottom:none; }
-.feed-meta { display:flex; align-items:center; gap:8px; margin-bottom:4px; }
-.feed-sentiment {
-  font-size:9px; letter-spacing:1px; text-transform:uppercase;
-  padding:2px 8px; border-radius:4px; font-weight:700;
-}
-.feed-sentiment.neg  { color:var(--red);   background:rgba(255,34,68,.1);  border:1px solid rgba(255,34,68,.2); }
-.feed-sentiment.pos  { color:var(--green); background:rgba(0,255,136,.1); border:1px solid rgba(0,255,136,.2); }
-.feed-sentiment.neu  { color:var(--amber); background:rgba(255,170,0,.1);  border:1px solid rgba(255,170,0,.2); }
-.feed-source { font-size:10px; color:var(--muted); }
-.feed-time   { font-size:9px; color:var(--muted); margin-left:auto; }
-.feed-text { font-size:12px; color:var(--text); line-height:1.4; }
+/* ============================================================
+   MOBILE — single column, everything stacked
+   ============================================================ */
+@media screen and (max-width:900px){
+  .wrap{ padding:10px; gap:10px; }
 
-/* ── BOTTOM STATS ── */
-.btm-bar { display:grid; grid-template-columns:repeat(5,1fr); gap:12px; }
-.bchip { background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:10px 14px; display:flex; align-items:center; gap:10px; }
-.bicon { font-size:18px; }
-.bval  { font-family:'Orbitron',monospace; font-size:13px; color:var(--cyan); font-weight:700; }
-.blbl  { font-size:10px; color:var(--muted); letter-spacing:1px; text-transform:uppercase; }
+  /* Header */
+  .header{ flex-direction:column; align-items:flex-start; padding:12px 14px; }
+  .h-sub{ display:none; }
+  .h-right{ width:100%; justify-content:space-between; }
+  .h-title{ font-size:12px; letter-spacing:2px; }
 
-.err-toast { position:fixed;bottom:22px;right:22px;background:rgba(255,34,68,.1);border:1px solid var(--red);border-radius:10px;padding:14px 20px;font-size:13px;color:var(--red);display:none;z-index:999;max-width:320px; }
-
-@media(max-width:900px){
+  /* Kill the 3-col grid completely */
   .main-layout{
-    grid-template-columns:1fr !important;
-    grid-template-rows:auto !important;
+    display:flex !important;
+    flex-direction:column !important;
+    gap:10px;
   }
-  .center-panel{ grid-column:1 !important; grid-row:1 !important; align-items:center !important; padding:16px !important; }
-  .risk-seg    { grid-column:1 !important; grid-row:2 !important; }
-  .churn-factors{grid-column:1 !important; grid-row:3 !important; }
-  .playbook    { grid-column:1 !important; grid-row:4 !important; }
-  .sentiment   { grid-column:1 !important; grid-row:5 !important; }
-  .gauge-section{ width:100% !important; display:flex !important; justify-content:center !important; align-items:center !important; }
-  .ring-container{ margin:0 auto !important; width:220px !important; height:220px !important; }
-  .ring-pct    { font-size:36px !important; }
-  .btm-bar     { grid-template-columns:1fr 1fr !important; }
-  .btm-bar .bchip:last-child{ grid-column:1/3 !important; }
-  .panel       { padding:12px !important; }
-  .h-sub       { display:none !important; }
-  .header      { flex-direction:column !important; align-items:flex-start !important; }
-  .h-right     { width:100% !important; justify-content:space-between !important; }
+
+  /* All panels full width, natural order */
+  .center-panel,
+  .risk-seg,
+  .churn-factors,
+  .playbook,
+  .sentiment{
+    grid-column:unset !important;
+    grid-row:unset !important;
+    width:100% !important;
+  }
+
+  /* Center panel — ring must be centered */
+  .center-panel{
+    padding:16px !important;
+    align-items:center !important;
+  }
+  .gauge-section{
+    width:100% !important;
+    display:flex !important;
+    flex-direction:column !important;
+    align-items:center !important;
+    justify-content:center !important;
+  }
+  .ring-container{
+    width:220px !important;
+    height:220px !important;
+    margin:0 auto !important;
+    left:unset !important;
+    right:unset !important;
+    position:relative !important;
+  }
+  .ring-pct{ font-size:40px !important; }
+  .ring-label{ font-size:9px !important; }
+
+  /* Form stays 2-col */
+  .form-grid{ grid-template-columns:1fr 1fr; gap:8px; }
+
+  /* Panels */
+  .panel{ padding:14px; }
+
+  /* Treemap */
+  .tree-pct.big-text{ font-size:22px; }
+
+  /* Bottom bar: 2x2 + 1 centered */
+  .btm-bar{
+    grid-template-columns:1fr 1fr !important;
+    gap:8px;
+  }
+  .btm-bar .bchip:last-child{ grid-column:1/3; justify-content:center; }
+  .bval{ font-size:12px; }
+  .blbl{ font-size:9px; }
+
+  /* Hide play descriptions to save space */
+  .play-desc{ display:none; }
 }
 
+@media screen and (max-width:380px){
+  .form-grid{ grid-template-columns:1fr; }
+  .toggle-row{ grid-template-columns:1fr; }
+  .ring-container{ width:180px !important; height:180px !important; }
+  .ring-pct{ font-size:32px !important; }
+}
 </style>
 </head>
 <body>
 <canvas id="bg-canvas"></canvas>
-
 <div class="wrap">
 
   <!-- HEADER -->
@@ -303,10 +235,7 @@ body {
       </div>
     </div>
     <div class="h-right">
-      <div class="s-pill">
-        <div class="sdot" id="sdot"></div>
-        <span id="stxt">Connecting...</span>
-      </div>
+      <div class="s-pill"><div class="sdot" id="sdot"></div><span id="stxt">Connecting...</span></div>
       <div class="acc-chip" id="achip">Model: —</div>
     </div>
   </div>
@@ -314,42 +243,9 @@ body {
   <!-- MAIN LAYOUT -->
   <div class="main-layout">
 
-    <!-- LEFT TOP: Risk Segmentation -->
-    <div class="panel risk-seg">
-      <div class="ptitle">Risk Segmentation</div>
-      <div class="seg-cards">
-        <div class="seg-card">
-          <div class="seg-card-title">New Users<br>High Volatility</div>
-          <div class="seg-pct high" id="seg-new">38%</div>
-          <div class="seg-tag">Churn Risk</div>
-          <canvas class="spark-canvas" id="spark1"></canvas>
-        </div>
-        <div class="seg-card">
-          <div class="seg-card-title">Premium<br>Subscribers</div>
-          <div class="seg-pct low" id="seg-prem">8%</div>
-          <div class="seg-tag">Churn Risk</div>
-          <canvas class="spark-canvas" id="spark2"></canvas>
-        </div>
-        <div class="seg-card">
-          <div class="seg-card-title">Feature-Specific<br>Low Engagement</div>
-          <div class="seg-pct medium" id="seg-feat">52%</div>
-          <div class="seg-tag">Churn Risk</div>
-          <canvas class="spark-canvas" id="spark3"></canvas>
-        </div>
-        <div class="seg-card">
-          <div class="seg-card-title">Long-term<br>Customers</div>
-          <div class="seg-pct low" id="seg-long">12%</div>
-          <div class="seg-tag">Churn Risk</div>
-          <canvas class="spark-canvas" id="spark4"></canvas>
-        </div>
-      </div>
-    </div>
-
-    <!-- CENTER: Gauge + Inputs -->
+    <!-- CENTER: Gauge + Inputs (first on mobile) -->
     <div class="panel center-panel">
       <div class="ptitle" style="width:100%">Predicted Churn Rate</div>
-
-      <!-- Big Ring Gauge -->
       <div class="gauge-section">
         <div class="ring-container">
           <canvas id="mainRing" width="260" height="260"></canvas>
@@ -360,70 +256,26 @@ body {
           </div>
         </div>
       </div>
-
-      <!-- Input Form -->
       <div class="input-form" style="width:100%">
         <div class="ptitle" style="margin-top:8px">Customer Profile</div>
         <div class="form-grid">
-          <div class="field">
-            <label>Credit Score</label>
-            <input class="cyber-input" type="number" id="f-credit" value="650" min="350" max="850">
-          </div>
-          <div class="field">
-            <label>Age</label>
-            <input class="cyber-input" type="number" id="f-age" value="35" min="18" max="92">
-          </div>
-          <div class="field">
-            <label>Geography</label>
-            <select class="cyber-select" id="f-geo">
-              <option value="France">France</option>
-              <option value="Germany">Germany</option>
-              <option value="Spain">Spain</option>
-            </select>
-          </div>
-          <div class="field">
-            <label>Gender</label>
-            <select class="cyber-select" id="f-gender">
-              <option value="Male">Male</option>
-              <option value="Female">Female</option>
-            </select>
-          </div>
-          <div class="field">
-            <label>Tenure (yrs)</label>
-            <input class="cyber-input" type="number" id="f-tenure" value="5" min="0" max="10">
-          </div>
-          <div class="field">
-            <label>Balance (€)</label>
-            <input class="cyber-input" type="number" id="f-balance" value="75000" min="0">
-          </div>
-          <div class="field">
-            <label>Products</label>
-            <select class="cyber-select" id="f-products">
-              <option value="1">1</option>
-              <option value="2" selected>2</option>
-              <option value="3">3</option>
-              <option value="4">4</option>
-            </select>
-          </div>
-          <div class="field">
-            <label>Salary (€)</label>
-            <input class="cyber-input" type="number" id="f-salary" value="100000" min="0">
-          </div>
+          <div class="field"><label>Credit Score</label><input class="cyber-input" type="number" id="f-credit" value="650" min="350" max="850"></div>
+          <div class="field"><label>Age</label><input class="cyber-input" type="number" id="f-age" value="35" min="18" max="92"></div>
+          <div class="field"><label>Geography</label><select class="cyber-select" id="f-geo"><option value="France">France</option><option value="Germany">Germany</option><option value="Spain">Spain</option></select></div>
+          <div class="field"><label>Gender</label><select class="cyber-select" id="f-gender"><option value="Male">Male</option><option value="Female">Female</option></select></div>
+          <div class="field"><label>Tenure (yrs)</label><input class="cyber-input" type="number" id="f-tenure" value="5" min="0" max="10"></div>
+          <div class="field"><label>Balance (€)</label><input class="cyber-input" type="number" id="f-balance" value="75000" min="0"></div>
+          <div class="field"><label>Products</label><select class="cyber-select" id="f-products"><option value="1">1</option><option value="2" selected>2</option><option value="3">3</option><option value="4">4</option></select></div>
+          <div class="field"><label>Salary (€)</label><input class="cyber-input" type="number" id="f-salary" value="100000" min="0"></div>
         </div>
         <div class="toggle-row">
           <div>
             <div style="font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:4px">Credit Card</div>
-            <div class="toggle-group">
-              <button class="toggle-btn active" id="cc-yes" onclick="tog('cc',1)">YES</button>
-              <button class="toggle-btn" id="cc-no" onclick="tog('cc',0)">NO</button>
-            </div>
+            <div class="toggle-group"><button class="toggle-btn active" id="cc-yes" onclick="tog('cc',1)">YES</button><button class="toggle-btn" id="cc-no" onclick="tog('cc',0)">NO</button></div>
           </div>
           <div>
             <div style="font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:4px">Active Member</div>
-            <div class="toggle-group">
-              <button class="toggle-btn active" id="am-yes" onclick="tog('am',1)">YES</button>
-              <button class="toggle-btn" id="am-no" onclick="tog('am',0)">NO</button>
-            </div>
+            <div class="toggle-group"><button class="toggle-btn active" id="am-yes" onclick="tog('am',1)">YES</button><button class="toggle-btn" id="am-no" onclick="tog('am',0)">NO</button></div>
           </div>
         </div>
         <button class="predict-btn" id="predictBtn" onclick="predict()">
@@ -433,134 +285,55 @@ body {
       </div>
     </div>
 
+    <!-- LEFT TOP: Risk Segmentation -->
+    <div class="panel risk-seg">
+      <div class="ptitle">Risk Segmentation</div>
+      <div class="seg-cards">
+        <div class="seg-card"><div class="seg-card-title">New Users<br>High Volatility</div><div class="seg-pct high" id="seg-new">38%</div><div class="seg-tag">Churn Risk</div><canvas class="spark-canvas" id="spark1"></canvas></div>
+        <div class="seg-card"><div class="seg-card-title">Premium<br>Subscribers</div><div class="seg-pct low" id="seg-prem">8%</div><div class="seg-tag">Churn Risk</div><canvas class="spark-canvas" id="spark2"></canvas></div>
+        <div class="seg-card"><div class="seg-card-title">Feature-Specific<br>Low Engagement</div><div class="seg-pct medium" id="seg-feat">52%</div><div class="seg-tag">Churn Risk</div><canvas class="spark-canvas" id="spark3"></canvas></div>
+        <div class="seg-card"><div class="seg-card-title">Long-term<br>Customers</div><div class="seg-pct low" id="seg-long">12%</div><div class="seg-tag">Churn Risk</div><canvas class="spark-canvas" id="spark4"></canvas></div>
+      </div>
+    </div>
+
     <!-- RIGHT TOP: Top Churn Factors -->
     <div class="panel churn-factors">
       <div class="ptitle">Top Churn Factors</div>
       <div class="treemap">
-        <div class="tree-item red-bg big">
-          <div class="tree-factor">Declined Payment</div>
-          <div class="tree-pct big-text">35%</div>
-        </div>
-        <div class="tree-item amber-bg">
-          <div class="tree-factor">Inactivity</div>
-          <div class="tree-pct">33%</div>
-        </div>
-        <div class="tree-item blue-bg">
-          <div class="tree-factor">Poor Support</div>
-          <div class="tree-pct">15%</div>
-        </div>
-        <div class="tree-item teal-bg">
-          <div class="tree-factor">Competitor<br>Offer</div>
-          <div class="tree-pct">10%</div>
-        </div>
-        <div class="tree-item dark-bg big">
-          <div class="tree-factor">Price Sensitivity</div>
-          <div class="tree-pct">7%</div>
-        </div>
+        <div class="tree-item red-bg big"><div class="tree-factor">Declined Payment</div><div class="tree-pct big-text">35%</div></div>
+        <div class="tree-item amber-bg"><div class="tree-factor">Inactivity</div><div class="tree-pct">33%</div></div>
+        <div class="tree-item blue-bg"><div class="tree-factor">Poor Support</div><div class="tree-pct">15%</div></div>
+        <div class="tree-item teal-bg"><div class="tree-factor">Competitor<br>Offer</div><div class="tree-pct">10%</div></div>
+        <div class="tree-item dark-bg big"><div class="tree-factor">Price Sensitivity</div><div class="tree-pct">7%</div></div>
       </div>
-
-      <!-- Mini trend chart -->
-      
     </div>
 
     <!-- LEFT BOTTOM: Retention Playbook -->
     <div class="panel playbook">
       <div class="ptitle">Retention Playbook</div>
-      <div class="play-item">
-        <div class="play-icon">🎁</div>
-        <div class="play-text">
-          <div class="play-title">Offer 3-Month Discount</div>
-          <div class="play-desc">Target high-risk users with balance > €100K</div>
-        </div>
-        <div class="play-badge urgent">URGENT</div>
-      </div>
-      <div class="play-item">
-        <div class="play-icon">📧</div>
-        <div class="play-text">
-          <div class="play-title">Personalised Re-engagement Email</div>
-          <div class="play-desc">Inactive members with tenure > 3 years</div>
-        </div>
-        <div class="play-badge high-p">HIGH</div>
-      </div>
-      <div class="play-item">
-        <div class="play-icon">🎫</div>
-        <div class="play-text">
-          <div class="play-title">Prioritise Support Tickets</div>
-          <div class="play-desc">Germany segment — 2× churn rate vs France</div>
-        </div>
-        <div class="play-badge urgent">URGENT</div>
-      </div>
-      <div class="play-item">
-        <div class="play-icon">📱</div>
-        <div class="play-text">
-          <div class="play-title">Push App Notification</div>
-          <div class="play-desc">Single-product customers — upsell opportunity</div>
-        </div>
-        <div class="play-badge normal">NORMAL</div>
-      </div>
-      <div class="play-item">
-        <div class="play-icon">🔒</div>
-        <div class="play-text">
-          <div class="play-title">Loyalty Tier Upgrade</div>
-          <div class="play-desc">Female segment — 10.4% higher churn detected</div>
-        </div>
-        <div class="play-badge high-p">HIGH</div>
-      </div>
+      <div class="play-item"><div class="play-icon">🎁</div><div class="play-text"><div class="play-title">Offer 3-Month Discount</div><div class="play-desc">Target high-risk users with balance > €100K</div></div><div class="play-badge urgent">URGENT</div></div>
+      <div class="play-item"><div class="play-icon">📧</div><div class="play-text"><div class="play-title">Personalised Re-engagement Email</div><div class="play-desc">Inactive members with tenure > 3 years</div></div><div class="play-badge high-p">HIGH</div></div>
+      <div class="play-item"><div class="play-icon">🎫</div><div class="play-text"><div class="play-title">Prioritise Support Tickets</div><div class="play-desc">Germany segment — 2× churn rate vs France</div></div><div class="play-badge urgent">URGENT</div></div>
+      <div class="play-item"><div class="play-icon">📱</div><div class="play-text"><div class="play-title">Push App Notification</div><div class="play-desc">Single-product customers — upsell opportunity</div></div><div class="play-badge normal">NORMAL</div></div>
+      <div class="play-item"><div class="play-icon">🔒</div><div class="play-text"><div class="play-title">Loyalty Tier Upgrade</div><div class="play-desc">Female segment — 10.4% higher churn detected</div></div><div class="play-badge high-p">HIGH</div></div>
     </div>
 
     <!-- RIGHT BOTTOM: Live Sentiment Feed -->
     <div class="panel sentiment">
       <div class="feed-header">
         <div class="ptitle" style="margin-bottom:0">Live Sentiment Feed</div>
-        <div class="live-tag">
-          <div class="live-blink"></div>
-          LIVE
-        </div>
+        <div class="live-tag"><div class="live-blink"></div>LIVE</div>
       </div>
       <div id="feedContainer">
-        <div class="feed-item">
-          <div class="feed-meta">
-            <span class="feed-sentiment neg">NEGATIVE</span>
-            <span class="feed-source">Twitter · @user_4821</span>
-            <span class="feed-time">2m ago</span>
-          </div>
-          <div class="feed-text">"Service was down again. Switching to a competitor." 😡</div>
-        </div>
-        <div class="feed-item">
-          <div class="feed-meta">
-            <span class="feed-sentiment pos">POSITIVE</span>
-            <span class="feed-source">App Review · iOS</span>
-            <span class="feed-time">5m ago</span>
-          </div>
-          <div class="feed-text">"The new dashboard update is fantastic! Love it."</div>
-        </div>
-        <div class="feed-item">
-          <div class="feed-meta">
-            <span class="feed-sentiment neg">NEGATIVE</span>
-            <span class="feed-source">Support Chat · ID #2291</span>
-            <span class="feed-time">9m ago</span>
-          </div>
-          <div class="feed-text">"My payment was declined three times. No explanation."</div>
-        </div>
-        <div class="feed-item">
-          <div class="feed-meta">
-            <span class="feed-sentiment neu">NEUTRAL</span>
-            <span class="feed-source">Email · CRM #5582</span>
-            <span class="feed-time">14m ago</span>
-          </div>
-          <div class="feed-text">"Considering cancelling unless pricing improves next quarter."</div>
-        </div>
-        <div class="feed-item">
-          <div class="feed-meta">
-            <span class="feed-sentiment pos">POSITIVE</span>
-            <span class="feed-source">Trustpilot · 5★</span>
-            <span class="feed-time">22m ago</span>
-          </div>
-          <div class="feed-text">"Exceptional support team resolved my issue instantly!"</div>
-        </div>
+        <div class="feed-item"><div class="feed-meta"><span class="feed-sentiment neg">NEGATIVE</span><span class="feed-source">Twitter · @user_4821</span><span class="feed-time">2m ago</span></div><div class="feed-text">"Service was down again. Switching to a competitor." 😡</div></div>
+        <div class="feed-item"><div class="feed-meta"><span class="feed-sentiment pos">POSITIVE</span><span class="feed-source">App Review · iOS</span><span class="feed-time">5m ago</span></div><div class="feed-text">"The new dashboard update is fantastic! Love it."</div></div>
+        <div class="feed-item"><div class="feed-meta"><span class="feed-sentiment neg">NEGATIVE</span><span class="feed-source">Support Chat · ID #2291</span><span class="feed-time">9m ago</span></div><div class="feed-text">"My payment was declined three times. No explanation."</div></div>
+        <div class="feed-item"><div class="feed-meta"><span class="feed-sentiment neu">NEUTRAL</span><span class="feed-source">Email · CRM #5582</span><span class="feed-time">14m ago</span></div><div class="feed-text">"Considering cancelling unless pricing improves next quarter."</div></div>
+        <div class="feed-item"><div class="feed-meta"><span class="feed-sentiment pos">POSITIVE</span><span class="feed-source">Trustpilot · 5★</span><span class="feed-time">22m ago</span></div><div class="feed-text">"Exceptional support team resolved my issue instantly!"</div></div>
       </div>
     </div>
-  </div>
+
+  </div><!-- end main-layout -->
 
   <!-- BOTTOM STATS BAR -->
   <div class="btm-bar">
@@ -571,17 +344,16 @@ body {
     <div class="bchip"><div class="bicon">🌲</div><div><div class="bval">RF</div><div class="blbl">Random Forest</div></div></div>
   </div>
 
-</div>
-
+</div><!-- end wrap -->
 <div class="err-toast" id="errToast"></div>
 
 <script>
-const API = window.location.origin;
-let state = { cc:1, am:1 };
+const API='http://127.0.0.1:5000';
+let state={cc:1,am:1};
 
-//  Constellation BG 
-const bgC = document.getElementById('bg-canvas'), bgX = bgC.getContext('2d');
-let nodes = [];
+// BG Canvas
+const bgC=document.getElementById('bg-canvas'),bgX=bgC.getContext('2d');
+let nodes=[];
 function resizeBg(){bgC.width=innerWidth;bgC.height=innerHeight;}
 function initNodes(){nodes=Array.from({length:65},()=>({x:Math.random()*bgC.width,y:Math.random()*bgC.height,vx:(Math.random()-.5)*.28,vy:(Math.random()-.5)*.28,r:Math.random()*1.8+.7}));}
 function drawBg(){
@@ -600,191 +372,120 @@ function drawBg(){
 resizeBg();initNodes();drawBg();
 window.addEventListener('resize',()=>{resizeBg();initNodes();});
 
-// Main Ring Gauge 
-let mainRingInst = null;
-function drawMainRing(pct, color) {
-  if(mainRingInst) mainRingInst.destroy();
-  const remaining = 100 - pct;
-  mainRingInst = new Chart(document.getElementById('mainRing'), {
-    type: 'doughnut',
-    data: {
-      datasets: [{
-        data: [pct, remaining],
-        backgroundColor: [color, 'rgba(0,220,255,0.05)'],
-        borderWidth: 0,
-        borderRadius: 6
-      }]
-    },
-    options: {
-      cutout: '76%', responsive:false,
-      plugins:{ legend:{display:false}, tooltip:{enabled:false} },
-      animation:{ duration:1200, easing:'easeOutQuart' },
-      rotation: -90, circumference: 360
-    }
+// Ring Gauge
+let mainRingInst=null;
+function drawMainRing(pct,color){
+  if(mainRingInst)mainRingInst.destroy();
+  mainRingInst=new Chart(document.getElementById('mainRing'),{
+    type:'doughnut',
+    data:{datasets:[{data:[pct,100-pct],backgroundColor:[color,'rgba(0,220,255,0.05)'],borderWidth:0,borderRadius:6}]},
+    options:{cutout:'76%',responsive:true,maintainAspectRatio:true,plugins:{legend:{display:false},tooltip:{enabled:false}},animation:{duration:1200,easing:'easeOutQuart'},rotation:-90,circumference:360}
   });
 }
-drawMainRing(20.4, 'rgba(0,220,255,0.7)');
+drawMainRing(20.4,'rgba(0,220,255,0.7)');
 
 // Sparklines
-function drawSpark(id, data, color) {
-  const canvas = document.getElementById(id);
-  if(!canvas) return;
-  const ctx = canvas.getContext('2d');
-  const w = canvas.offsetWidth || 110, h = 32;
-  canvas.width = w; canvas.height = h;
-  const max = Math.max(...data), min = Math.min(...data);
-  const pts = data.map((v,i) => ({ x: (i/(data.length-1))*w, y: h - ((v-min)/(max-min||1))*(h-4)-2 }));
+function drawSpark(id,data,color){
+  const canvas=document.getElementById(id);if(!canvas)return;
+  const ctx=canvas.getContext('2d');
+  const w=canvas.offsetWidth||110,h=32;
+  canvas.width=w;canvas.height=h;
+  const max=Math.max(...data),min=Math.min(...data);
+  const pts=data.map((v,i)=>({x:(i/(data.length-1))*w,y:h-((v-min)/(max-min||1))*(h-4)-2}));
   ctx.clearRect(0,0,w,h);
-  const grad = ctx.createLinearGradient(0,0,0,h);
-  grad.addColorStop(0, color.replace(')',',0.3)').replace('rgb','rgba'));
-  grad.addColorStop(1, 'transparent');
-  ctx.beginPath(); ctx.moveTo(pts[0].x, pts[0].y);
-  pts.slice(1).forEach(p => ctx.lineTo(p.x, p.y));
-  ctx.lineTo(w, h); ctx.lineTo(0, h); ctx.closePath();
-  ctx.fillStyle = grad; ctx.fill();
-  ctx.beginPath(); ctx.moveTo(pts[0].x, pts[0].y);
-  pts.slice(1).forEach(p => ctx.lineTo(p.x, p.y));
-  ctx.strokeStyle = color; ctx.lineWidth = 1.5; ctx.stroke();
+  const grad=ctx.createLinearGradient(0,0,0,h);
+  grad.addColorStop(0,color.replace(')',',0.3)').replace('rgb','rgba'));
+  grad.addColorStop(1,'transparent');
+  ctx.beginPath();ctx.moveTo(pts[0].x,pts[0].y);
+  pts.slice(1).forEach(p=>ctx.lineTo(p.x,p.y));
+  ctx.lineTo(w,h);ctx.lineTo(0,h);ctx.closePath();
+  ctx.fillStyle=grad;ctx.fill();
+  ctx.beginPath();ctx.moveTo(pts[0].x,pts[0].y);
+  pts.slice(1).forEach(p=>ctx.lineTo(p.x,p.y));
+  ctx.strokeStyle=color;ctx.lineWidth=1.5;ctx.stroke();
 }
-setTimeout(() => {
-  drawSpark('spark1', [35,42,38,50,45,60,55,38], '#ff2244');
-  drawSpark('spark2', [10,8,9,7,8,6,8,8], '#00ff88');
-  drawSpark('spark3', [48,52,50,55,58,52,56,52], '#ffaa00');
-  drawSpark('spark4', [14,12,13,11,12,10,12,12], '#00ff88');
-}, 100);
+setTimeout(()=>{
+  drawSpark('spark1',[35,42,38,50,45,60,55,38],'#ff2244');
+  drawSpark('spark2',[10,8,9,7,8,6,8,8],'#00ff88');
+  drawSpark('spark3',[48,52,50,55,58,52,56,52],'#ffaa00');
+  drawSpark('spark4',[14,12,13,11,12,10,12,12],'#00ff88');
+},100);
 
-// Monthly Trend Chart
-
-// Live feed animation 
-const FEEDS = [
-  { s:'neg', src:'Twitter · @angry_user',    time:'just now', txt:'"Your app just lost all my transaction history!"' },
-  { s:'pos', src:'App Store · 5★',           time:'1m ago',   txt:'"Best banking app I\'ve used. Incredibly intuitive."' },
-  { s:'neg', src:'Support · Ticket #9821',   time:'3m ago',   txt:'"Been waiting 3 days for a callback. Unacceptable."' },
-  { s:'neu', src:'Email Survey · ID #4410',  time:'7m ago',   txt:'"Thinking about switching if fees increase again."' },
-  { s:'pos', src:'Trustpilot · 4★',          time:'11m ago',  txt:'"Fast transfers and great customer service!"' },
+// Live Feed
+const FEEDS=[
+  {s:'neg',src:'Twitter · @angry_user',time:'just now',txt:'"Your app just lost all my transaction history!"'},
+  {s:'pos',src:'App Store · 5★',time:'1m ago',txt:'"Best banking app I\'ve used. Incredibly intuitive."'},
+  {s:'neg',src:'Support · Ticket #9821',time:'3m ago',txt:'"Been waiting 3 days for a callback. Unacceptable."'},
+  {s:'neu',src:'Email Survey · ID #4410',time:'7m ago',txt:'"Thinking about switching if fees increase again."'},
+  {s:'pos',src:'Trustpilot · 4★',time:'11m ago',txt:'"Fast transfers and great customer service!"'},
 ];
-let feedIdx = 0;
-setInterval(() => {
-  const item = FEEDS[feedIdx % FEEDS.length];
-  feedIdx++;
-  const container = document.getElementById('feedContainer');
-  const map = { neg:'NEGATIVE', pos:'POSITIVE', neu:'NEUTRAL' };
-  const div = document.createElement('div');
-  div.className = 'feed-item';
-  div.style.opacity = '0';
-  div.style.transition = 'opacity 0.5s';
-  div.innerHTML = `
-    <div class="feed-meta">
-      <span class="feed-sentiment ${item.s}">${map[item.s]}</span>
-      <span class="feed-source">${item.src}</span>
-      <span class="feed-time">${item.time}</span>
-    </div>
-    <div class="feed-text">${item.txt}</div>`;
-  container.insertBefore(div, container.firstChild);
-  setTimeout(() => div.style.opacity = '1', 50);
-  if(container.children.length > 5) container.removeChild(container.lastChild);
-}, 5000);
+let feedIdx=0;
+setInterval(()=>{
+  const item=FEEDS[feedIdx%FEEDS.length];feedIdx++;
+  const c=document.getElementById('feedContainer');
+  const map={neg:'NEGATIVE',pos:'POSITIVE',neu:'NEUTRAL'};
+  const div=document.createElement('div');
+  div.className='feed-item';div.style.opacity='0';div.style.transition='opacity 0.5s';
+  div.innerHTML=`<div class="feed-meta"><span class="feed-sentiment ${item.s}">${map[item.s]}</span><span class="feed-source">${item.src}</span><span class="feed-time">${item.time}</span></div><div class="feed-text">${item.txt}</div>`;
+  c.insertBefore(div,c.firstChild);
+  setTimeout(()=>div.style.opacity='1',50);
+  if(c.children.length>5)c.removeChild(c.lastChild);
+},5000);
 
-// Toggle 
-function tog(key, val) {
-  state[key] = val;
-  if(key==='cc') {
-    document.getElementById('cc-yes').className='toggle-btn'+(val===1?' active':'');
-    document.getElementById('cc-no').className ='toggle-btn'+(val===0?' active':'');
-  } else {
-    document.getElementById('am-yes').className='toggle-btn'+(val===1?' active':'');
-    document.getElementById('am-no').className ='toggle-btn'+(val===0?' active':'');
-  }
+// Toggle
+function tog(key,val){
+  state[key]=val;
+  if(key==='cc'){document.getElementById('cc-yes').className='toggle-btn'+(val===1?' active':'');document.getElementById('cc-no').className='toggle-btn'+(val===0?' active':'');}
+  else{document.getElementById('am-yes').className='toggle-btn'+(val===1?' active':'');document.getElementById('am-no').className='toggle-btn'+(val===0?' active':'');}
 }
 
-// Server check 
-async function checkServer() {
-  try {
-    const r = await fetch(`${API}/model-info`, {signal:AbortSignal.timeout(2200)});
-    const d = await r.json();
-    document.getElementById('sdot').className = 'sdot on';
-    document.getElementById('stxt').textContent = 'Model Online';
-    document.getElementById('achip').textContent = `RF · ${d.accuracy || '86.5%'}`;
-  } catch {
-    document.getElementById('sdot').className = 'sdot off';
-    document.getElementById('stxt').textContent = 'Run app.py to connect';
+// Server check
+async function checkServer(){
+  try{
+    const r=await fetch(`${API}/model-info`,{signal:AbortSignal.timeout(2200)});
+    const d=await r.json();
+    document.getElementById('sdot').className='sdot on';
+    document.getElementById('stxt').textContent='Model Online';
+    document.getElementById('achip').textContent=`RF · ${d.accuracy||'86.5%'}`;
+  }catch{
+    document.getElementById('sdot').className='sdot off';
+    document.getElementById('stxt').textContent='Run app.py to connect';
   }
 }
 checkServer();
 
-function showErr(msg) {
-  const el=document.getElementById('errToast');
-  el.textContent=msg; el.style.display='block';
-  setTimeout(()=>el.style.display='none',5000);
-}
+function showErr(msg){const el=document.getElementById('errToast');el.textContent=msg;el.style.display='block';setTimeout(()=>el.style.display='none',5000);}
 
-// PREDICT 
-async function predict() {
-  const credit_score    = parseInt(document.getElementById('f-credit').value);
-  const age             = parseInt(document.getElementById('f-age').value);
-  const geography       = document.getElementById('f-geo').value;
-  const gender          = document.getElementById('f-gender').value;
-  const tenure          = parseInt(document.getElementById('f-tenure').value);
-  const balance         = parseFloat(document.getElementById('f-balance').value)||0;
-  const num_products    = parseInt(document.getElementById('f-products').value);
-  const estimated_salary= parseFloat(document.getElementById('f-salary').value)||0;
-  const has_cr_card     = state.cc;
-  const is_active       = state.am;
-
-  if(!credit_score||credit_score<350||credit_score>850) return showErr('Credit score must be 350–850.');
-
-  const btn=document.getElementById('predictBtn');
-  const sp=document.getElementById('spinner');
-  const bt=document.getElementById('btnTxt');
-  btn.disabled=true; sp.style.display='block'; bt.textContent='ANALYSING...';
-
-  try {
-    const resp = await fetch(`${API}/predict`, {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({
-        credit_score, geography, gender, age, tenure,
-        balance, num_products, has_cr_card, is_active, estimated_salary
-      })
-    });
-    const data = await resp.json();
-    if(!data.success) throw new Error(data.error);
-
-    const prob  = data.probability;
-    const isChurn = data.prediction === 1;
-
-    // Pick ring color based on risk
-    let ringColor;
-    if(prob < 30)      ringColor = 'rgba(0,255,136,0.8)';
-    else if(prob < 60) ringColor = 'rgba(255,170,0,0.8)';
-    else               ringColor = 'rgba(255,34,68,0.85)';
-
-    // Update big ring
-    drawMainRing(prob, ringColor);
-    const rp = document.getElementById('ringPct');
-    rp.textContent = prob + '%';
-    rp.style.color = ringColor.replace('0.8)','1)').replace('rgba','rgb').replace(',1)',')');;
-    rp.style.textShadow = `0 0 30px ${ringColor}`;
-    document.getElementById('ringPct').style.color = isChurn ? '#ff2244' : '#00ff88';
-
-    document.getElementById('ringPct').textContent = prob + '%';
-    document.getElementById('ringSub').textContent = isChurn ? '⚠  LIKELY TO CHURN' : '✓  LIKELY TO STAY';
-    document.getElementById('ringSub').style.color = isChurn ? 'var(--red)' : 'var(--green)';
-
-    // Update segment cards based on customer profile
-    const segNew  = isChurn ? Math.min(95, prob + 25) : Math.max(5,  prob - 10);
-    const segFeat = isChurn ? Math.min(90, prob + 15) : Math.max(8,  prob - 5);
-    document.getElementById('seg-new').textContent  = segNew.toFixed(0)+'%';
-    document.getElementById('seg-feat').textContent = segFeat.toFixed(0)+'%';
-
-    // Re-sparkle with updated data
-    const newData = Array.from({length:8},(_,i)=>Math.max(5,prob+(Math.random()-0.5)*20));
-    drawSpark('spark1', newData, isChurn?'#ff2244':'#ffaa00');
-
-  } catch(e) {
-    showErr('Flask server not reachable. Run: python app.py\n'+e.message);
-  }
-
-  btn.disabled=false; sp.style.display='none'; bt.textContent='📡 ANALYSE CHURN RISK';
+// Predict
+async function predict(){
+  const credit_score=parseInt(document.getElementById('f-credit').value);
+  const age=parseInt(document.getElementById('f-age').value);
+  const geography=document.getElementById('f-geo').value;
+  const gender=document.getElementById('f-gender').value;
+  const tenure=parseInt(document.getElementById('f-tenure').value);
+  const balance=parseFloat(document.getElementById('f-balance').value)||0;
+  const num_products=parseInt(document.getElementById('f-products').value);
+  const estimated_salary=parseFloat(document.getElementById('f-salary').value)||0;
+  const has_cr_card=state.cc,is_active=state.am;
+  if(!credit_score||credit_score<350||credit_score>850)return showErr('Credit score must be 350–850.');
+  const btn=document.getElementById('predictBtn'),sp=document.getElementById('spinner'),bt=document.getElementById('btnTxt');
+  btn.disabled=true;sp.style.display='block';bt.textContent='ANALYSING...';
+  try{
+    const resp=await fetch(`${API}/predict`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({credit_score,geography,gender,age,tenure,balance,num_products,has_cr_card,is_active,estimated_salary})});
+    const data=await resp.json();
+    if(!data.success)throw new Error(data.error);
+    const prob=data.probability,isChurn=data.prediction===1;
+    let ringColor=prob<30?'rgba(0,255,136,0.8)':prob<60?'rgba(255,170,0,0.8)':'rgba(255,34,68,0.85)';
+    drawMainRing(prob,ringColor);
+    const rp=document.getElementById('ringPct');
+    rp.textContent=prob+'%';rp.style.color=isChurn?'#ff2244':'#00ff88';rp.style.textShadow=`0 0 30px ${ringColor}`;
+    document.getElementById('ringSub').textContent=isChurn?'⚠  LIKELY TO CHURN':'✓  LIKELY TO STAY';
+    document.getElementById('ringSub').style.color=isChurn?'var(--red)':'var(--green)';
+    document.getElementById('seg-new').textContent=(isChurn?Math.min(95,prob+25):Math.max(5,prob-10)).toFixed(0)+'%';
+    document.getElementById('seg-feat').textContent=(isChurn?Math.min(90,prob+15):Math.max(8,prob-5)).toFixed(0)+'%';
+    drawSpark('spark1',Array.from({length:8},()=>Math.max(5,prob+(Math.random()-0.5)*20)),isChurn?'#ff2244':'#ffaa00');
+  }catch(e){showErr('Flask server not reachable. Run: python app.py\n'+e.message);}
+  btn.disabled=false;sp.style.display='none';bt.textContent='📡 ANALYSE CHURN RISK';
 }
 </script>
 </body>
