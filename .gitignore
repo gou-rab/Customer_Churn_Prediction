@@ -1,5 +1,4 @@
 # Generated model files
-*.pkl
 *.png
 
 # Python cache
@@ -13,4 +12,5 @@ env/
 .env
 
 # VS Code
+
 .vscode/
